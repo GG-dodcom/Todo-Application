@@ -21,11 +21,12 @@ $this->registerCss('
         right: -400px;
         width: 400px;
         height: calc(100% - 56px); /* Adjust height to account for top offset */
-        background: white;
-        box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+        background: #f8f9fa;
+        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2); /* Softer shadow for depth */
         transition: right 0.3s ease-in-out;
         z-index: 1000;
         overflow-y: auto;
+        border-left: 1px solid #e9ecef; /* Subtle border for separation */
     }
     .task-panel.active {
         right: 0;
@@ -38,6 +39,7 @@ $this->registerCss('
         font-weight: bold;
         display: flex;
         align-items: center;
+        border-bottom: 1px solid #218838; /* Darker green border */
     }
     .task-panel-header::before {
         content: "●";
@@ -49,21 +51,26 @@ $this->registerCss('
     }
     .task-panel-content p {
         margin: 10px 0;
+        color: #333; /* Darker text for readability */
     }
     .close-panel {
         cursor: pointer;
         color: white;
         margin-left: auto;
         padding: 0 10px;
-        transition: background-color 0.3s;
+        transition: background-color 0.3s, color 0.3s;
     }
     .close-panel:hover {
-        background-color: rgba(0, 0, 0, 0.2); /* Subtle hover feedback */
+        background-color: #218838; /* Darker green on hover */
+        color: #fff;
     }
     .form-error {
         color: #dc3545;
         font-size: 0.875em;
         margin-top: 5px;
+        background: #ffebee; /* Light red background for error visibility */
+        padding: 5px;
+        border-radius: 3px;
     }
     .has-error .help-block {
         color: #dc3545;
@@ -171,19 +178,19 @@ $this->registerJs('
             // Action buttons: view, update, delete
             [
               'class' => 'yii\grid\ActionColumn',
-            'template' => '{view} {update} {delete}',
-              'buttons' => [
-                  'view' => function ($url, $model) {
-                      return Html::a(
-                          '<i class="bi bi-eye"></i>',
-                          '#',
-                          [
-                          'class' => 'btn btn-sm btn-primary',
-                          'onclick' => 'showTaskPanel(' . $model->id . '); return false;',
-                              'title' => 'View Details',
-                          ]
-                      );
-                  },
+              'template' => '{view} {update} {delete}',
+                'buttons' => [
+                    'view' => function ($url, $model) {
+                        return Html::a(
+                            '<i class="bi bi-eye"></i>',
+                            '#',
+                            [
+                            'class' => 'btn btn-sm btn-primary',
+                            'onclick' => 'showTaskPanel(' . $model->id . '); return false;',
+                                'title' => 'View Details',
+                            ]
+                        );
+                    },
                     'update' => function ($url, $model) {
                         return Html::a(
                             '<i class="bi bi-pencil"></i>',
@@ -200,4 +207,4 @@ $this->registerJs('
         ],
     ]); ?>
 
-<div id="task-panel" class="task-panel"></div>
+<?php echo $this->render('_panel'); ?>

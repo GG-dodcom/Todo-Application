@@ -1,20 +1,8 @@
-### Reference for Design
-
-![alt text](image.png)
-
-![alt text](image-1.png)
-
-![alt text](image-2.png)
-
-![alt text](image-3.png)
-
-## 📄 `README.md` Sample
-
 # Yii2 Todo App
 
 ## Requirements
 
-- PHP 7.4+
+- PHP 8.2.12
 - MySQL or MariaDB
 - Composer
 

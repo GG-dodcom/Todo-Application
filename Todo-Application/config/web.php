@@ -52,7 +52,10 @@ $config = [
         */
     ],
     'params' => $params,
-];
+    // Set the default route to task/index
+    'defaultRoute' => 'task/index', // This makes / or the root URL load task/index
+    'name' => 'To Do', // Change this to your desired application title
+  ];
 
 if (YII_ENV_DEV) {
     // configuration adjustments for 'dev' environment

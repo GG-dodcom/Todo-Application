@@ -34,7 +34,7 @@ class TaskController extends Controller
                     'class' => \yii\filters\AccessControl::class,
                     'rules' => [
                         [
-                            'actions' => ['index', 'create', 'update', 'delete', 'calendar', 'view-panel', 'create-panel', 'update-panel', 'toggle-complete'],
+                            'actions' => ['index', 'create', 'update', 'delete', 'calendar', 'view-panel', 'create-panel', 'update-panel', 'toggle-complete', 'calendar-data', 'calendar-panel'],
                             'allow' => true,
                             'roles' => ['@'],
                         ],
@@ -42,6 +42,17 @@ class TaskController extends Controller
                 ],
             ]
         );
+    }
+
+    /**
+     * Disable CSRF for calendar-data action since it's a GET request
+     */
+    public function beforeAction($action)
+    {
+        if ($action->id === 'calendar-data') {
+            $this->enableCsrfValidation = false;
+        }
+        return parent::beforeAction($action);
     }
 
     /**
@@ -285,5 +296,82 @@ class TaskController extends Controller
     {
         $model = $this->findModel($id);
         return $this->renderPartial('update-panel', ['model' => $model]);
+    }
+
+    /**
+     * Displays a calendar view of tasks.
+     * @return string
+     */
+    public function actionCalendar()
+    {
+        return $this->render('calendar');
+    }
+
+    /**
+     * Generates JSON data for FullCalendar events.
+     * @param int $year
+     * @param int $month
+     * @return array
+     */
+    public function actionCalendarData($year = null, $month = null)
+    {
+        try {
+            $query = Task::find();
+            if ($year && $month) {
+                $startDate = sprintf('%d-%02d-01', $year, $month + 1);
+                $endDate = date('Y-m-t', strtotime($startDate));
+                $query->where(['between', 'due_date', $startDate, $endDate]);
+            }
+            $tasks = $query->all();
+            $events = [];
+            $today = date('Y-m-d');
+            foreach ($tasks as $task) {
+                if ($task->due_date) {
+                    $events[] = [
+                        'id' => $task->id,
+                        'title' => $task->name,
+                        'start' => $task->due_date,
+                        'className' => $task->is_complete ? 'task-completed' : (strtotime($task->due_date) < strtotime($today) ? 'task-overdue' : 'task-pending')
+                    ];
+                }
+            }
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            return $events;
+        } catch (\Exception $e) {
+            Yii::error($e->getMessage(), __METHOD__);
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            return ['error' => 'Failed to load calendar data: ' . $e->getMessage()];
+        }
+    }
+
+    /**
+     * Displays a panel for a specific date to view/add tasks.
+     * @param string $date The selected date in YYYY-MM-DD format
+     * @return string
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    public function actionCalendarPanel($date)
+    {
+        $model = new Task();
+        $model->due_date = $date; // Pre-fill due date
+        $tasks = Task::find()->where(['due_date' => $date])->all();
+
+        if (Yii::$app->request->isAjax) {
+            if ($model->load(Yii::$app->request->post()) && $model->save()) {
+                Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                return [
+                    'success' => true,
+                    'message' => 'Task created successfully',
+                    'id' => $model->id,
+                ];
+            }
+            return $this->renderAjax('_calendar_panel', [
+                'model' => $model,
+                'tasks' => $tasks,
+                'date' => $date,
+            ]);
+        }
+
+        return $this->redirect(['calendar']);
     }
 }
