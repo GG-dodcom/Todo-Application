@@ -12,8 +12,8 @@
 
 ```
 
-git clone [https://github.com/your-username/yii2-todo.git](https://github.com/your-username/yii2-todo.git)
-cd yii2-todo
+git clone https://github.com/GG-dodcom/Todo-Application.git
+cd Todo-Application
 
 ```
 
